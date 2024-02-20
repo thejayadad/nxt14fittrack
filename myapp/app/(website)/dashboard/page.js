@@ -3,6 +3,7 @@ import React, { Suspense } from 'react'
 import {Skeleton} from "@nextui-org/react";
 import Category from '@/models/Category';
 import connectDB from '@/lib/db';
+import CreateCategory from '@/components/CreateCategory';
 
 
 const DashboardPage = async () => {
@@ -48,8 +49,9 @@ async function CollectionList(){
     const categories = await Category.find({ creator: userEmail })
     if(categories.length === 0){
         return (
-            <div>
+            <div className='flex flex-col max-w-screen-lg mx-auto'>
                 no categories yet
+                <CreateCategory />
             </div>
         )
     }
