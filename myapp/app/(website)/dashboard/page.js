@@ -1,59 +1,48 @@
-import getServerUser from '@/lib/getServerUser'
+import { getExercises } from '@/lib/data'
+import Link from 'next/link'
 import React, { Suspense } from 'react'
-import {Skeleton} from "@nextui-org/react";
-import Category from '@/models/Category';
-import connectDB from '@/lib/db';
-import CreateCategory from '@/components/CreateCategory';
 
 
 const DashboardPage = async () => {
-  return (
+return (
     <>
-    <Suspense fallback={<WelcomeMsgFallback />}>
-        <WelcomeMsg />
-    </Suspense>
-    <Suspense>
-        <CollectionList />
+    <Suspense fallback={<div>Loading Exercises...</div>}>
+        <ExerciseList />
     </Suspense>
     </>
-  )
+)
+  
 }
 
-async function WelcomeMsg(){
-    const user = await getServerUser()
-    if(!user){
-        return <div>Error</div>
-    }
+async function ExerciseList(){
+    const exercises = await getExercises()
+
     return (
+      <div>
+       {exercises.length === 0 ? (
+        <p>No exercises posted.</p>
+      ) : (
         <div>
-            Welcome, <br />
-            {user.email}
-        </div>
-    )
-}
-function WelcomeMsgFallback(){
-    return(
-        <div className='flex w-full'>
-            <div className='text-3xl font-bold'>
-            <Skeleton className="h-3 w-4/5 rounded-lg"/>
+          {exercises.map(exercise => (
+            <div key={exercise.id}>
+              {/* Render ExerciseAccordion component for each exercise */}
+              <div className='mb-4 p-8 border hover:bg-gray-100'>
+                <div className='flex justify-between'>
+                    <p>
+                        <Link href={`/dashboard/exercise/${exercise.id}`}>
+                            {exercise.name}
+                        </Link>
+                    </p>
+
+                </div>
             </div>
+            </div>
+          ))}
         </div>
+      )}
+      </div>
+
     )
 }
 
-async function CollectionList(){
-    const user = await getServerUser()
-    const userEmail = user.email
-    console.log("User " + userEmail) 
-    await connectDB()
-    const categories = await Category.find({ creator: userEmail })
-    if(categories.length === 0){
-        return (
-            <div className='flex flex-col max-w-screen-lg mx-auto'>
-                no categories yet
-                <CreateCategory />
-            </div>
-        )
-    }
-}
 export default DashboardPage

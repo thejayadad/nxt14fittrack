@@ -8,8 +8,6 @@ const ExerciseSchema = new mongoose.Schema({
     distance: { type: Number },
     calories: { type: Number },
     notes: { type: String },
-    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
-
   });
 
 export default mongoose?.models?.Exercise || mongoose.model("Exercise", ExerciseSchema)

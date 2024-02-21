@@ -1,38 +1,51 @@
 'use server'
+import Exercise from "@/models/Exercise"
 import connectDB from "./db"
-import Category from "@/models/Category"
 import getServerUser from "./getServerUser"
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
-export async function createCategory(form){
-    await connectDB()
+
+export const addExercise = async (formData) => {
+  const userId = await getServerUser(authOptions)
+  const userEmail = userId.email
+  console.log("UserId Email " + userEmail)
+  const { name, date, duration, distance, calories, notes } =
+  Object.fromEntries(formData);
+  try {
+      await connectDB()
+      const newExercise = new Exercise({
+          name, date, duration, distance, calories, notes
+      })
+      await newExercise.save()
+  } catch (error) {
+      throw new Error("Failed to create exercise! " + error);
+
+  }
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
+}
+
+export const updateExercise = async (formData) => {
+    const { id, name, date, duration, distance, calories, notes } =
+    Object.fromEntries(formData);
     try {
-        const user = await getServerUser();
-        const userEmail = user.email;
-        
-        if (!user) {
-          throw new Error("User not found");
-        }
-    
-        // Create a new category instance
-        const newCategory = new Category({
-          creator: userEmail,
-          name: form.name,
-          color: form.color,
-        });
-      // Save the category to the database
-      const savedCategory = await newCategory.save();
+        await connectDB()
+        const updateFields = {
+            name, date, duration, distance, calories, notes
+          };
+      
+          Object.keys(updateFields).forEach(
+            (key) =>
+              (updateFields[key] === "" || undefined) && delete updateFields[key]
+          );
+      
+          await Exercise.findByIdAndUpdate(id, updateFields);
+    } catch (error) {
+        throw new Error("Failed to update exercise! " + error);
 
-      // Convert the Mongoose document to a plain object
-      const plainCategory = savedCategory.toObject();
-  
-      // Convert nested properties to plain objects if needed
-      plainCategory.creator = plainCategory.creator.toObject(); // Assuming creator is a Mongoose ObjectId
-      // Convert other nested properties as needed
-  
-      // Return the plain object
-      return plainCategory;
-      } catch (error) {
-        throw new Error("Failed to create category: " + error.message);
-      }
-
+    }
+    revalidatePath("/dashboard");
+    redirect("/dashboard");
 }
