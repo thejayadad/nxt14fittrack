@@ -6,7 +6,8 @@ export const getExercises = async () => {
     try {
         await connectDB()
         const exercises = await Exercise.find({})
-        return exercises
+        return new Response(JSON.stringify(exercises), { status: 200 })
+
     } catch (error) {
         throw new Error("Failed to fetch exercises! " + error);
     

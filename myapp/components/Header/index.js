@@ -28,8 +28,8 @@ const Header = async () => {
     </NavbarContent>
     {!!session && (
         <>
-          <Link href={'/dashboard'}>
-            {session?.user?.name}
+          <Link href={'/dashboard/new'}>
+            Post Exercise
           </Link>
           <LogoutButton />
         </>
